@@ -4,6 +4,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../customer/domain/entities/customer.dart';
 import '../../../customer/presentation/cubit/customer_list_cubit.dart';
 import '../../../customer/presentation/cubit/customer_list_state.dart';
+import '../../../customer/presentation/widgets/customer_id_lookup_field.dart';
 import '../../domain/entities/bill.dart';
 import '../cubit/billing_cubit.dart';
 
@@ -167,32 +168,11 @@ class _BillFormDialogState extends State<BillFormDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Customer selection
-                BlocBuilder<CustomerListCubit, CustomerListState>(
-                  builder: (context, state) {
-                    final List<Customer> customers = state is CustomerListLoaded
-                        ? state.allCustomers
-                        : [];
-
-                    if (_selectedCustomerId == null && customers.isNotEmpty) {
-                      _selectedCustomerId = customers.first.id;
-                    }
-
-                    return DropdownButtonFormField<String>(
-                      value: _selectedCustomerId,
-                      decoration: const InputDecoration(
-                        labelText: 'Customer Account *',
-                        prefixIcon: Icon(Icons.person_outline),
-                      ),
-                      items: customers.map((c) {
-                        return DropdownMenuItem(
-                          value: c.id,
-                          child: Text('${c.fullName} (${c.nationalId})'),
-                        );
-                      }).toList(),
-                      onChanged: (val) => setState(() => _selectedCustomerId = val),
-                      validator: (val) => val == null || val.isEmpty ? 'Select customer' : null,
-                    );
+                // Customer ID lookup
+                CustomerIdLookupField(
+                  initialCustomerId: _selectedCustomerId,
+                  onCustomerSelected: (customer) {
+                    _selectedCustomerId = customer?.id;
                   },
                 ),
                 const SizedBox(height: 16),

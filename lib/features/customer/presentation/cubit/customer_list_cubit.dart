@@ -119,4 +119,32 @@ class CustomerListCubit extends Cubit<CustomerListState> {
       return null;
     }
   }
+
+  Customer? getCustomerByIdOrNationalId(String query) {
+    if (state is! CustomerListLoaded) return null;
+    final current = state as CustomerListLoaded;
+    final q = query.trim();
+    if (q.isEmpty) return null;
+    try {
+      return current.allCustomers.firstWhere((c) =>
+          c.nationalId.trim() == q ||
+          c.id.trim().toLowerCase() == q.toLowerCase());
+    } catch (_) {
+      return null;
+    }
+  }
+
+  List<Customer> searchSuggestions(String query, {int limit = 5}) {
+    if (state is! CustomerListLoaded) return [];
+    final current = state as CustomerListLoaded;
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return [];
+    return current.allCustomers
+        .where((c) =>
+            c.nationalId.toLowerCase().contains(q) ||
+            c.id.toLowerCase().contains(q) ||
+            c.fullName.toLowerCase().contains(q))
+        .take(limit)
+        .toList();
+  }
 }
