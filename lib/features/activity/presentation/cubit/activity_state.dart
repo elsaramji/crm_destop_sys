@@ -22,7 +22,7 @@ class ActivityLoaded extends ActivityState {
   });
 
   List<Activity> get sortedActivities {
-    final list = selectedType == null
+    final list = (selectedType == null || selectedType == ActivityType.all)
         ? List<Activity>.from(allActivities)
         : allActivities.where((a) => a.type == selectedType).toList();
     list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -32,10 +32,11 @@ class ActivityLoaded extends ActivityState {
   ActivityLoaded copyWith({
     List<Activity>? allActivities,
     ActivityType? selectedType,
+    bool clearSelectedType = false,
   }) {
     return ActivityLoaded(
       allActivities: allActivities ?? this.allActivities,
-      selectedType: selectedType ?? this.selectedType,
+      selectedType: clearSelectedType ? null : (selectedType ?? this.selectedType),
     );
   }
 

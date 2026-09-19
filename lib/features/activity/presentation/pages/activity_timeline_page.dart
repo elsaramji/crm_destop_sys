@@ -43,28 +43,29 @@ class ActivityTimelinePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Filter by Activity Type
+            // Filter by Activity Category / Type
             BlocBuilder<ActivityCubit, ActivityState>(
               builder: (context, state) {
                 final selected = state is ActivityLoaded ? state.selectedType : null;
 
                 return Row(
                   children: [
-                    const Text('Type: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                    const SizedBox(width: 8),
-                    ChoiceChip(
-                      label: const Text('All'),
-                      selected: selected == null,
-                      onSelected: (_) => context.read<ActivityCubit>().filterByType(null),
-                    ),
+                    const Text('Category: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                     const SizedBox(width: 8),
                     ...ActivityType.values.map((t) {
+                      final isSelected = (t == ActivityType.all && (selected == null || selected == ActivityType.all)) || selected == t;
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: ChoiceChip(
                           label: Text(t.displayName),
-                          selected: selected == t,
-                          onSelected: (_) => context.read<ActivityCubit>().filterByType(t),
+                          selected: isSelected,
+                          onSelected: (selectedBool) {
+                            if (t == ActivityType.all) {
+                              context.read<ActivityCubit>().filterByType(null);
+                            } else {
+                              context.read<ActivityCubit>().filterByType(selectedBool ? t : null);
+                            }
+                          },
                         ),
                       );
                     }),
@@ -258,6 +259,8 @@ class ActivityTimelinePage extends StatelessWidget {
 
   IconData _getTypeIcon(ActivityType type) {
     switch (type) {
+      case ActivityType.all:
+        return Icons.grid_view_rounded;
       case ActivityType.call:
         return Icons.phone_in_talk;
       case ActivityType.visit:
@@ -273,6 +276,8 @@ class ActivityTimelinePage extends StatelessWidget {
 
   Color _getTypeColor(ActivityType type) {
     switch (type) {
+      case ActivityType.all:
+        return const Color(0xFF6366F1);
       case ActivityType.call:
         return const Color(0xFF0284C7);
       case ActivityType.visit:

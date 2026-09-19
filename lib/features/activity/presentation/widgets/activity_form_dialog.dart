@@ -191,7 +191,7 @@ class _ActivityFormDialogState extends State<ActivityFormDialog> {
                       child: DropdownButtonFormField<ActivityType>(
                         value: _selectedType,
                         decoration: const InputDecoration(
-                          labelText: 'Activity Type *',
+                          labelText: 'Activity Category / Type *',
                           prefixIcon: Icon(Icons.category_outlined),
                         ),
                         items: ActivityType.values.map((t) {

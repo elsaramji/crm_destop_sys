@@ -33,10 +33,11 @@ class BillingLoaded extends BillingState {
   BillingLoaded copyWith({
     List<Bill>? allBills,
     BillStatus? statusFilter,
+    bool clearStatusFilter = false,
   }) {
     return BillingLoaded(
       allBills: allBills ?? this.allBills,
-      statusFilter: statusFilter ?? this.statusFilter,
+      statusFilter: clearStatusFilter ? null : (statusFilter ?? this.statusFilter),
     );
   }
 

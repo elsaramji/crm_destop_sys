@@ -22,7 +22,7 @@ class ServiceLoaded extends ServiceState {
   });
 
   List<ServiceItem> get filteredServices {
-    if (selectedCategory == null || selectedCategory!.isEmpty) {
+    if (selectedCategory == null || selectedCategory!.isEmpty || selectedCategory == 'All') {
       return allServices;
     }
     return allServices.where((s) => s.category == selectedCategory).toList();
@@ -31,10 +31,11 @@ class ServiceLoaded extends ServiceState {
   ServiceLoaded copyWith({
     List<ServiceItem>? allServices,
     String? selectedCategory,
+    bool clearSelectedCategory = false,
   }) {
     return ServiceLoaded(
       allServices: allServices ?? this.allServices,
-      selectedCategory: selectedCategory ?? this.selectedCategory,
+      selectedCategory: clearSelectedCategory ? null : (selectedCategory ?? this.selectedCategory),
     );
   }
 

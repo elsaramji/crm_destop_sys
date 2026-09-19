@@ -424,13 +424,17 @@ class _CustomerActivitiesTab extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
-                                  act.type == ActivityType.call
-                                      ? Icons.phone_in_talk
-                                      : act.type == ActivityType.visit
-                                          ? Icons.business
-                                          : act.type == ActivityType.complaint
-                                              ? Icons.warning_amber
-                                              : Icons.assignment_turned_in,
+                                  act.type == ActivityType.all
+                                      ? Icons.grid_view_rounded
+                                      : act.type == ActivityType.call
+                                          ? Icons.phone_in_talk
+                                          : act.type == ActivityType.visit
+                                              ? Icons.business
+                                              : act.type == ActivityType.complaint
+                                                  ? Icons.warning_amber
+                                                  : act.type == ActivityType.followUp
+                                                      ? Icons.assignment_turned_in
+                                                      : Icons.chat_bubble_outline,
                                   color: AppTheme.accentIndigo,
                                   size: 20,
                                 ),

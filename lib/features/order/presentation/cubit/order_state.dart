@@ -29,10 +29,11 @@ class OrderLoaded extends OrderState {
   OrderLoaded copyWith({
     List<Order>? allOrders,
     OrderStatus? statusFilter,
+    bool clearStatusFilter = false,
   }) {
     return OrderLoaded(
       allOrders: allOrders ?? this.allOrders,
-      statusFilter: statusFilter ?? this.statusFilter,
+      statusFilter: clearStatusFilter ? null : (statusFilter ?? this.statusFilter),
     );
   }
 

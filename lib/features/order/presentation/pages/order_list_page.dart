@@ -53,7 +53,7 @@ class OrderListPage extends StatelessWidget {
                 return Row(
                   children: [
                     const Text(
-                      'Status: ',
+                      'Category / Status: ',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
@@ -61,7 +61,7 @@ class OrderListPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     ChoiceChip(
-                      label: const Text('All Orders'),
+                      label: const Text('All'),
                       selected: selected == null,
                       onSelected: (_) =>
                           context.read<OrderCubit>().filterByStatus(null),
@@ -73,8 +73,8 @@ class OrderListPage extends StatelessWidget {
                         child: ChoiceChip(
                           label: Text(s.displayName),
                           selected: selected == s,
-                          onSelected: (_) =>
-                              context.read<OrderCubit>().filterByStatus(s),
+                          onSelected: (selectedBool) =>
+                              context.read<OrderCubit>().filterByStatus(selectedBool ? s : null),
                         ),
                       );
                     }),

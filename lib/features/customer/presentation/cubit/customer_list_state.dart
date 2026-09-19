@@ -30,12 +30,13 @@ class CustomerListLoaded extends CustomerListState {
     List<Customer>? filteredCustomers,
     String? searchQuery,
     String? selectedBranch,
+    bool clearBranch = false,
   }) {
     return CustomerListLoaded(
       allCustomers: allCustomers ?? this.allCustomers,
       filteredCustomers: filteredCustomers ?? this.filteredCustomers,
       searchQuery: searchQuery ?? this.searchQuery,
-      selectedBranch: selectedBranch ?? this.selectedBranch,
+      selectedBranch: clearBranch ? null : (selectedBranch ?? this.selectedBranch),
     );
   }
 

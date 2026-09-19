@@ -50,7 +50,10 @@ class OrderCubit extends Cubit<OrderState> {
   void filterByStatus(OrderStatus? status) {
     if (state is! OrderLoaded) return;
     final current = state as OrderLoaded;
-    emit(current.copyWith(statusFilter: status));
+    emit(OrderLoaded(
+      allOrders: current.allOrders,
+      statusFilter: status,
+    ));
   }
 
   List<Order> getOrdersForCustomer(String customerId) {

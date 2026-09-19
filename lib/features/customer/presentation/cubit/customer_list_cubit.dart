@@ -45,9 +45,11 @@ class CustomerListCubit extends Cubit<CustomerListState> {
   void filterByBranch(String? branch) {
     if (state is! CustomerListLoaded) return;
     final current = state as CustomerListLoaded;
-    emit(current.copyWith(
-      selectedBranch: branch,
+    emit(CustomerListLoaded(
+      allCustomers: current.allCustomers,
       filteredCustomers: _applyFilters(current.allCustomers, current.searchQuery, branch),
+      searchQuery: current.searchQuery,
+      selectedBranch: branch,
     ));
   }
 

@@ -40,7 +40,9 @@ class ServiceListPage extends StatelessWidget {
             BlocBuilder<ServiceCubit, ServiceState>(
               builder: (context, state) {
                 final selected = state is ServiceLoaded ? state.selectedCategory : null;
-                const categories = ['All', 'Retail POS', 'Telecom', 'Maintenance', 'Software', 'Consulting'];
+                final allCategories = state is ServiceLoaded
+                    ? {'Retail POS', 'Telecom', 'Maintenance', 'Software', 'Consulting', ...state.allServices.map((s) => s.category).where((c) => c.isNotEmpty)}
+                    : {'Retail POS', 'Telecom', 'Maintenance', 'Software', 'Consulting'};
 
                 return Row(
                   children: [
@@ -48,16 +50,23 @@ class ServiceListPage extends StatelessWidget {
                     const SizedBox(width: 8),
                     Wrap(
                       spacing: 8,
-                      children: categories.map((cat) {
-                        final isSelected = (cat == 'All' && selected == null) || (cat == selected);
-                        return ChoiceChip(
-                          label: Text(cat),
-                          selected: isSelected,
-                          onSelected: (_) {
-                            context.read<ServiceCubit>().filterByCategory(cat == 'All' ? null : cat);
-                          },
-                        );
-                      }).toList(),
+                      children: [
+                        ChoiceChip(
+                          label: const Text('All'),
+                          selected: selected == null || selected == 'All',
+                          onSelected: (_) => context.read<ServiceCubit>().filterByCategory(null),
+                        ),
+                        ...allCategories.map((cat) {
+                          final isSelected = selected == cat;
+                          return ChoiceChip(
+                            label: Text(cat),
+                            selected: isSelected,
+                            onSelected: (selectedBool) {
+                              context.read<ServiceCubit>().filterByCategory(selectedBool ? cat : null);
+                            },
+                          );
+                        }),
+                      ],
                     ),
                   ],
                 );

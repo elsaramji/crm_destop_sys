@@ -38,7 +38,10 @@ class ActivityCubit extends Cubit<ActivityState> {
   void filterByType(ActivityType? type) {
     if (state is! ActivityLoaded) return;
     final current = state as ActivityLoaded;
-    emit(current.copyWith(selectedType: type));
+    emit(ActivityLoaded(
+      allActivities: current.allActivities,
+      selectedType: (type == ActivityType.all) ? null : type,
+    ));
   }
 
   List<Activity> getActivitiesForCustomer(String customerId) {

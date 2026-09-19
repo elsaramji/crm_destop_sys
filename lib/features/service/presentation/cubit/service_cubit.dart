@@ -38,7 +38,10 @@ class ServiceCubit extends Cubit<ServiceState> {
   void filterByCategory(String? category) {
     if (state is! ServiceLoaded) return;
     final current = state as ServiceLoaded;
-    emit(current.copyWith(selectedCategory: category));
+    emit(ServiceLoaded(
+      allServices: current.allServices,
+      selectedCategory: (category == null || category.isEmpty || category == 'All') ? null : category,
+    ));
   }
 
   List<ServiceItem> getServicesForCustomer(String customerId) {

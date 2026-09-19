@@ -95,7 +95,7 @@ class BillingPage extends StatelessWidget {
                 return Row(
                   children: [
                     const Text(
-                      'Filter: ',
+                      'Category / Status: ',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
@@ -103,7 +103,7 @@ class BillingPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     ChoiceChip(
-                      label: const Text('All Invoices'),
+                      label: const Text('All'),
                       selected: selected == null,
                       onSelected: (_) =>
                           context.read<BillingCubit>().filterByStatus(null),
@@ -115,8 +115,8 @@ class BillingPage extends StatelessWidget {
                         child: ChoiceChip(
                           label: Text(s.displayName),
                           selected: selected == s,
-                          onSelected: (_) =>
-                              context.read<BillingCubit>().filterByStatus(s),
+                          onSelected: (selectedBool) =>
+                              context.read<BillingCubit>().filterByStatus(selectedBool ? s : null),
                         ),
                       );
                     }),

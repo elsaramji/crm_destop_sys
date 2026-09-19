@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 enum ActivityType {
+  all('All'),
   call('Call'),
   visit('Visit'),
   complaint('Complaint'),

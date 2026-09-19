@@ -65,7 +65,10 @@ class BillingCubit extends Cubit<BillingState> {
   void filterByStatus(BillStatus? status) {
     if (state is! BillingLoaded) return;
     final current = state as BillingLoaded;
-    emit(current.copyWith(statusFilter: status));
+    emit(BillingLoaded(
+      allBills: current.allBills,
+      statusFilter: status,
+    ));
   }
 
   List<Bill> getBillsForCustomer(String customerId) {
