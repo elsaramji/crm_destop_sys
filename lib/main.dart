@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
@@ -11,9 +13,21 @@ import 'features/activity/presentation/cubit/activity_cubit.dart';
 import 'features/order/presentation/cubit/order_cubit.dart';
 import 'features/billing/presentation/cubit/billing_cubit.dart';
 import 'features/excel_io/presentation/cubit/excel_io_cubit.dart';
+import 'injection.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // HydratedBloc desktop storage initialization per rules.md
+  HydratedBloc.storage = await HydratedStorage.build(
+    storageDirectory: HydratedStorageDirectory(
+      (await getApplicationSupportDirectory()).path,
+    ),
+  );
+
+  // Initialize SQLite database and dependency injection container
+  await configureDependencies();
+
   runApp(const CrmApp());
 }
 
@@ -38,14 +52,15 @@ class _CrmAppState extends State<CrmApp> {
   @override
   void initState() {
     super.initState();
-    _authCubit = AuthCubit();
-    _customerListCubit = CustomerListCubit();
-    _customerFormCubit = CustomerFormCubit();
-    _serviceCubit = ServiceCubit();
-    _activityCubit = ActivityCubit();
-    _orderCubit = OrderCubit();
-    _billingCubit = BillingCubit();
-    _excelIoCubit = ExcelIoCubit();
+    // Resolve cubits via GetIt DI container
+    _authCubit = getIt<AuthCubit>();
+    _customerListCubit = getIt<CustomerListCubit>();
+    _customerFormCubit = getIt<CustomerFormCubit>();
+    _serviceCubit = getIt<ServiceCubit>();
+    _activityCubit = getIt<ActivityCubit>();
+    _orderCubit = getIt<OrderCubit>();
+    _billingCubit = getIt<BillingCubit>();
+    _excelIoCubit = getIt<ExcelIoCubit>();
 
     _router = AppRouter.createRouter(_authCubit);
   }

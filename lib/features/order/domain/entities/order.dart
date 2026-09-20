@@ -11,13 +11,15 @@ enum OrderStatus {
 
   static OrderStatus fromString(String value) {
     return OrderStatus.values.firstWhere(
-      (e) => e.displayName.toLowerCase() == value.toLowerCase() || e.name.toLowerCase() == value.toLowerCase(),
+      (e) =>
+          e.displayName.toLowerCase() == value.toLowerCase() ||
+          e.name.toLowerCase() == value.toLowerCase(),
       orElse: () => OrderStatus.pending,
     );
   }
 }
 
-class Order extends Equatable {
+class Orders extends Equatable {
   final String id;
   final String customerId;
   final List<String> items;
@@ -26,7 +28,7 @@ class Order extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  const Order({
+  const Orders({
     required this.id,
     required this.customerId,
     required this.items,
@@ -36,7 +38,7 @@ class Order extends Equatable {
     required this.updatedAt,
   });
 
-  Order copyWith({
+  Orders copyWith({
     String? id,
     String? customerId,
     List<String>? items,
@@ -45,7 +47,7 @@ class Order extends Equatable {
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return Order(
+    return Orders(
       id: id ?? this.id,
       customerId: customerId ?? this.customerId,
       items: items ?? this.items,
@@ -58,12 +60,12 @@ class Order extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        customerId,
-        items,
-        status,
-        totalAmount,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    customerId,
+    items,
+    status,
+    totalAmount,
+    createdAt,
+    updatedAt,
+  ];
 }

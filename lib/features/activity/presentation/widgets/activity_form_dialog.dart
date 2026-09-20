@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../customer/domain/entities/customer.dart';
-import '../../../customer/presentation/cubit/customer_list_cubit.dart';
-import '../../../customer/presentation/cubit/customer_list_state.dart';
 import '../../../customer/presentation/widgets/customer_id_lookup_field.dart';
 import '../../domain/entities/activity.dart';
 import '../cubit/activity_cubit.dart';

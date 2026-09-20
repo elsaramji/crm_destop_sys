@@ -73,8 +73,9 @@ class OrderListPage extends StatelessWidget {
                         child: ChoiceChip(
                           label: Text(s.displayName),
                           selected: selected == s,
-                          onSelected: (selectedBool) =>
-                              context.read<OrderCubit>().filterByStatus(selectedBool ? s : null),
+                          onSelected: (selectedBool) => context
+                              .read<OrderCubit>()
+                              .filterByStatus(selectedBool ? s : null),
                         ),
                       );
                     }),
@@ -170,12 +171,19 @@ class OrderListPage extends StatelessWidget {
                                   // Order ID - Hyperlink to edit
                                   DataCell(
                                     InkWell(
-                                      onTap: () => OrderFormDialog.show(context, order: o),
+                                      onTap: () => OrderFormDialog.show(
+                                        context,
+                                        order: o,
+                                      ),
                                       mouseCursor: SystemMouseCursors.click,
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          const Icon(Icons.receipt_outlined, size: 16, color: AppTheme.primaryBlue),
+                                          const Icon(
+                                            Icons.receipt_outlined,
+                                            size: 16,
+                                            color: AppTheme.primaryBlue,
+                                          ),
                                           const SizedBox(width: 6),
                                           Text(
                                             '#${o.id.length > 8 ? o.id.substring(o.id.length - 8) : o.id}',
@@ -183,12 +191,18 @@ class OrderListPage extends StatelessWidget {
                                               fontWeight: FontWeight.bold,
                                               fontFamily: 'monospace',
                                               color: AppTheme.primaryBlue,
-                                              decoration: TextDecoration.underline,
-                                              decorationColor: AppTheme.primaryBlue,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                              decorationColor:
+                                                  AppTheme.primaryBlue,
                                             ),
                                           ),
                                           const SizedBox(width: 4),
-                                          const Icon(Icons.edit_outlined, size: 12, color: AppTheme.textMuted),
+                                          const Icon(
+                                            Icons.edit_outlined,
+                                            size: 12,
+                                            color: AppTheme.textMuted,
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -198,7 +212,9 @@ class OrderListPage extends StatelessWidget {
                                     InkWell(
                                       onTap: () {
                                         if (customer != null) {
-                                          context.go('/customers/${customer.id}');
+                                          context.go(
+                                            '/customers/${customer.id}',
+                                          );
                                         }
                                       },
                                       mouseCursor: SystemMouseCursors.click,
@@ -208,7 +224,8 @@ class OrderListPage extends StatelessWidget {
                                           color: AppTheme.accentIndigo,
                                           fontWeight: FontWeight.w600,
                                           decoration: TextDecoration.underline,
-                                          decorationColor: AppTheme.accentIndigo,
+                                          decorationColor:
+                                              AppTheme.accentIndigo,
                                         ),
                                       ),
                                     ),
@@ -271,16 +288,26 @@ class OrderListPage extends StatelessWidget {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         IconButton(
-                                          icon: const Icon(Icons.edit_outlined, size: 18),
+                                          icon: const Icon(
+                                            Icons.edit_outlined,
+                                            size: 18,
+                                          ),
                                           tooltip: 'Edit Order',
                                           color: const Color(0xFF475569),
-                                          onPressed: () => OrderFormDialog.show(context, order: o),
+                                          onPressed: () => OrderFormDialog.show(
+                                            context,
+                                            order: o,
+                                          ),
                                         ),
                                         IconButton(
-                                          icon: const Icon(Icons.delete_outline, size: 18),
+                                          icon: const Icon(
+                                            Icons.delete_outline,
+                                            size: 18,
+                                          ),
                                           tooltip: 'Delete Order',
                                           color: AppTheme.dangerRed,
-                                          onPressed: () => _confirmDelete(context, o),
+                                          onPressed: () =>
+                                              _confirmDelete(context, o),
                                         ),
                                       ],
                                     ),
@@ -302,19 +329,23 @@ class OrderListPage extends StatelessWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, Order order) {
+  void _confirmDelete(BuildContext context, Orders order) {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
         title: const Text('Delete Order'),
-        content: Text('Are you sure you want to delete order #${order.id}? This action cannot be undone.'),
+        content: Text(
+          'Are you sure you want to delete order #${order.id}? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.dangerRed),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.dangerRed,
+            ),
             onPressed: () {
               context.read<OrderCubit>().deleteOrder(order.id);
               Navigator.pop(dialogCtx);

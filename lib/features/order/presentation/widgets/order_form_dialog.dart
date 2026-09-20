@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/theme/app_theme.dart';
 import '../../../customer/domain/entities/customer.dart';
 import '../../../customer/presentation/cubit/customer_list_cubit.dart';
@@ -9,27 +10,21 @@ import '../../domain/entities/order.dart';
 import '../cubit/order_cubit.dart';
 
 class OrderFormDialog extends StatefulWidget {
-  final Order? order;
+  final Orders? order;
   final String? defaultCustomerId;
 
-  const OrderFormDialog({
-    super.key,
-    this.order,
-    this.defaultCustomerId,
-  });
+  const OrderFormDialog({super.key, this.order, this.defaultCustomerId});
 
   static Future<void> show(
     BuildContext context, {
-    Order? order,
+    Orders? order,
     String? defaultCustomerId,
   }) {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => OrderFormDialog(
-        order: order,
-        defaultCustomerId: defaultCustomerId,
-      ),
+      builder: (ctx) =>
+          OrderFormDialog(order: order, defaultCustomerId: defaultCustomerId),
     );
   }
 
@@ -51,8 +46,12 @@ class _OrderFormDialogState extends State<OrderFormDialog> {
   void initState() {
     super.initState();
     final o = widget.order;
-    _itemsCtrl = TextEditingController(text: o != null ? o.items.join(', ') : '');
-    _amountCtrl = TextEditingController(text: o != null ? o.totalAmount.toStringAsFixed(2) : '');
+    _itemsCtrl = TextEditingController(
+      text: o != null ? o.items.join(', ') : '',
+    );
+    _amountCtrl = TextEditingController(
+      text: o != null ? o.totalAmount.toStringAsFixed(2) : '',
+    );
     _selectedCustomerId = o?.customerId ?? widget.defaultCustomerId;
     _selectedStatus = o?.status ?? OrderStatus.pending;
     _selectedDate = o?.createdAt ?? DateTime.now();
@@ -94,7 +93,9 @@ class _OrderFormDialogState extends State<OrderFormDialog> {
 
     if (items.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter at least one ordered item.')),
+        const SnackBar(
+          content: Text('Please enter at least one ordered item.'),
+        ),
       );
       return;
     }
@@ -113,10 +114,12 @@ class _OrderFormDialogState extends State<OrderFormDialog> {
       orderCubit.updateOrder(updated);
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Order #${widget.order!.id} updated successfully.')),
+        SnackBar(
+          content: Text('Order #${widget.order!.id} updated successfully.'),
+        ),
       );
     } else {
-      final newOrder = Order(
+      final newOrder = Orders(
         id: 'ord_${DateTime.now().millisecondsSinceEpoch}',
         customerId: _selectedCustomerId!,
         items: items,
@@ -177,7 +180,8 @@ class _OrderFormDialogState extends State<OrderFormDialog> {
                     prefixIcon: Icon(Icons.inventory_2_outlined),
                     alignLabelWithHint: true,
                   ),
-                  validator: (val) => val == null || val.trim().isEmpty ? 'Enter items' : null,
+                  validator: (val) =>
+                      val == null || val.trim().isEmpty ? 'Enter items' : null,
                 ),
                 const SizedBox(height: 16),
 
@@ -188,13 +192,16 @@ class _OrderFormDialogState extends State<OrderFormDialog> {
                       flex: 3,
                       child: TextFormField(
                         controller: _amountCtrl,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         decoration: const InputDecoration(
                           labelText: 'Total Amount (EGP) *',
                           prefixIcon: Icon(Icons.attach_money),
                         ),
                         validator: (val) {
-                          if (val == null || val.trim().isEmpty) return 'Enter amount';
+                          if (val == null || val.trim().isEmpty)
+                            return 'Enter amount';
                           final p = double.tryParse(val.trim());
                           if (p == null || p <= 0) return 'Invalid amount';
                           return null;
@@ -217,7 +224,8 @@ class _OrderFormDialogState extends State<OrderFormDialog> {
                           );
                         }).toList(),
                         onChanged: (val) {
-                          if (val != null) setState(() => _selectedStatus = val);
+                          if (val != null)
+                            setState(() => _selectedStatus = val);
                         },
                       ),
                     ),

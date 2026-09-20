@@ -213,35 +213,45 @@ class MockData {
     ),
   ];
 
-  static final List<Order> initialOrders = [
-    Order(
+  static final List<Orders> initialOrders = [
+    Orders(
       id: 'ord_1',
       customerId: 'cust_1',
-      items: const ['Receipt Printer X-900', 'Thermal Paper 50 Rolls', 'Barcode Scanner USB'],
+      items: const [
+        'Receipt Printer X-900',
+        'Thermal Paper 50 Rolls',
+        'Barcode Scanner USB',
+      ],
       status: OrderStatus.completed,
       totalAmount: 3200.0,
       createdAt: DateTime.now().subtract(const Duration(days: 35)),
       updatedAt: DateTime.now().subtract(const Duration(days: 33)),
     ),
-    Order(
+    Orders(
       id: 'ord_2',
       customerId: 'cust_2',
-      items: const ['Industrial Dual-Band Router AC1900', 'Cat6 Cable 100m Drum'],
+      items: const [
+        'Industrial Dual-Band Router AC1900',
+        'Cat6 Cable 100m Drum',
+      ],
       status: OrderStatus.completed,
       totalAmount: 2400.0,
       createdAt: DateTime.now().subtract(const Duration(days: 25)),
       updatedAt: DateTime.now().subtract(const Duration(days: 24)),
     ),
-    Order(
+    Orders(
       id: 'ord_3',
       customerId: 'cust_3',
-      items: const ['ERP Multi-User License (5 Seats)', 'Database Migration Service'],
+      items: const [
+        'ERP Multi-User License (5 Seats)',
+        'Database Migration Service',
+      ],
       status: OrderStatus.inProgress,
       totalAmount: 9800.0,
       createdAt: DateTime.now().subtract(const Duration(days: 6)),
       updatedAt: DateTime.now().subtract(const Duration(days: 1)),
     ),
-    Order(
+    Orders(
       id: 'ord_4',
       customerId: 'cust_4',
       items: const ['Spare Motherboard B550', 'RAM 16GB DDR4 (x2)'],
@@ -250,7 +260,7 @@ class MockData {
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
       updatedAt: DateTime.now().subtract(const Duration(days: 1)),
     ),
-    Order(
+    Orders(
       id: 'ord_5',
       customerId: 'cust_6',
       items: const ['Smart Card Terminal Mobile GPRS'],

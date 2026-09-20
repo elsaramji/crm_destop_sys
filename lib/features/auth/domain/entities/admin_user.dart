@@ -15,6 +15,22 @@ class AdminUser extends Equatable {
     this.lastLoginAt,
   });
 
+  AdminUser copyWith({
+    String? id,
+    String? username,
+    String? name,
+    String? email,
+    DateTime? lastLoginAt,
+  }) {
+    return AdminUser(
+      id: id ?? this.id,
+      username: username ?? this.username,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+    );
+  }
+
   @override
   List<Object?> get props => [id, username, name, email, lastLoginAt];
 }

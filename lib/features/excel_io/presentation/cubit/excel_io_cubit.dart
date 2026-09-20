@@ -101,7 +101,7 @@ class ExcelIoCubit extends Cubit<ExcelIoState> {
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
-    customerCubit.addCustomer(newCustomer);
+    await customerCubit.addCustomer(newCustomer);
 
     emit(ExcelImportSuccess(
       ExcelImportReport(

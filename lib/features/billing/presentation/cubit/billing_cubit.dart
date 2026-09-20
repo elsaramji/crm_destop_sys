@@ -1,6 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/mock/mock_data.dart';
+import 'package:fpdart/fpdart.dart';
+
+import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/bill.dart';
+import '../../domain/usecases/delete_bill.dart';
+import '../../domain/usecases/get_all_bills.dart';
+import '../../domain/usecases/get_bills_by_customer.dart';
+import '../../domain/usecases/record_bill.dart';
+import '../../domain/usecases/update_bill.dart';
+import '../../domain/usecases/update_bill_status.dart';
 import 'billing_state.dart';
 
 class CustomerBalance {
@@ -16,50 +24,126 @@ class CustomerBalance {
 }
 
 class BillingCubit extends Cubit<BillingState> {
-  BillingCubit() : super(const BillingLoading()) {
+  final GetAllBills _getAllBills;
+  final GetBillsByCustomer _getBillsByCustomer;
+  final RecordBill _recordBill;
+  final UpdateBill _updateBill;
+  final UpdateBillStatus _updateBillStatus;
+  final DeleteBill _deleteBill;
+
+  BillingCubit({
+    required GetAllBills getAllBills,
+    required GetBillsByCustomer getBillsByCustomer,
+    required RecordBill recordBill,
+    required UpdateBill updateBill,
+    required UpdateBillStatus updateBillStatus,
+    required DeleteBill deleteBill,
+  })  : _getAllBills = getAllBills,
+        _getBillsByCustomer = getBillsByCustomer,
+        _recordBill = recordBill,
+        _updateBill = updateBill,
+        _updateBillStatus = updateBillStatus,
+        _deleteBill = deleteBill,
+        super(const BillingLoading()) {
     loadBills();
   }
 
-  void loadBills() {
-    emit(BillingLoaded(
-      allBills: List<Bill>.from(MockData.initialBills),
-    ));
+  Future<void> loadBills() async {
+    emit(const BillingLoading());
+    final result = await _getAllBills(const NoParams());
+    result.fold<void>(
+      (_) => emit(const BillingLoaded(allBills: [])),
+      (bills) => emit(BillingLoaded(allBills: bills)),
+    );
   }
 
-  void recordBill(Bill bill) {
-    if (state is! BillingLoaded) return;
-    final current = state as BillingLoaded;
-    final updated = [bill, ...current.allBills];
-    emit(current.copyWith(allBills: updated));
+  Future<void> loadBillsForCustomer(String customerId) async {
+    emit(const BillingLoading());
+    final result = await _getBillsByCustomer(customerId);
+    result.fold<void>(
+      (_) => emit(const BillingLoaded(allBills: [])),
+      (bills) => emit(BillingLoaded(allBills: bills)),
+    );
   }
 
-  void updateBill(Bill bill) {
-    if (state is! BillingLoaded) return;
-    final current = state as BillingLoaded;
-    final updated = current.allBills.map((b) => b.id == bill.id ? bill : b).toList();
-    emit(current.copyWith(allBills: updated));
+  Future<void> recordBill(Bill bill) async {
+    final result = await _recordBill(bill);
+    result.fold<void>(
+      (_) {},
+      (saved) {
+        if (state is BillingLoaded) {
+          final current = state as BillingLoaded;
+          final List<Bill> updated = [saved, ...current.allBills];
+          emit(current.copyWith(allBills: updated));
+        } else {
+          loadBills();
+        }
+      },
+    );
   }
 
-  void deleteBill(String billId) {
-    if (state is! BillingLoaded) return;
-    final current = state as BillingLoaded;
-    final updated = current.allBills.where((b) => b.id != billId).toList();
-    emit(current.copyWith(allBills: updated));
+  Future<void> updateBill(Bill bill) async {
+    final result = await _updateBill(bill);
+    result.fold<void>(
+      (_) {},
+      (saved) {
+        if (state is BillingLoaded) {
+          final current = state as BillingLoaded;
+          final List<Bill> updated = current.allBills
+              .map((b) => b.id == saved.id ? saved : b)
+              .toList();
+          emit(current.copyWith(allBills: updated));
+        } else {
+          loadBills();
+        }
+      },
+    );
   }
 
-  void updateBillStatus(String billId, BillStatus newStatus, double paidAmount) {
-    if (state is! BillingLoaded) return;
-    final current = state as BillingLoaded;
-    final updated = current.allBills.map((b) {
-      if (b.id == billId) {
-        return b.copyWith(
-          status: newStatus,
-          paidAmount: paidAmount,
-        );
-      }
-      return b;
-    }).toList();
-    emit(current.copyWith(allBills: updated));
+  Future<void> deleteBill(String billId) async {
+    final result = await _deleteBill(billId);
+    result.fold<void>(
+      (_) {},
+      (_) {
+        if (state is BillingLoaded) {
+          final current = state as BillingLoaded;
+          final List<Bill> updated =
+              current.allBills.where((b) => b.id != billId).toList();
+          emit(current.copyWith(allBills: updated));
+        }
+      },
+    );
+  }
+
+  Future<void> updateBillStatus(
+    String billId,
+    BillStatus newStatus,
+    double paidAmount,
+  ) async {
+    final result = await _updateBillStatus(
+      UpdateBillStatusParams(
+        billId: billId,
+        status: newStatus,
+        paidAmount: paidAmount,
+      ),
+    );
+    result.fold<void>(
+      (_) {},
+      (_) {
+        if (state is BillingLoaded) {
+          final current = state as BillingLoaded;
+          final List<Bill> updated = current.allBills.map((b) {
+            if (b.id == billId) {
+              return b.copyWith(status: newStatus, paidAmount: paidAmount);
+            }
+            return b;
+          }).toList();
+          emit(current.copyWith(allBills: updated));
+        } else {
+          loadBills();
+        }
+      },
+    );
   }
 
   void filterByStatus(BillStatus? status) {

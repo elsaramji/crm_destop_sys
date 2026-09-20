@@ -1,28 +1,51 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/mock/mock_data.dart';
+import '../../../../core/usecase/usecase.dart';
+import '../../domain/usecases/get_current_user.dart';
+import '../../domain/usecases/login.dart';
+import '../../domain/usecases/logout.dart';
 import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
-  AuthCubit() : super(const Authenticated(MockData.defaultAdmin)); // default logged-in for smooth desktop demo
+  final Login _login;
+  final GetCurrentUser _getCurrentUser;
+  final Logout _logout;
 
-  void checkAuth() {
-    // Already authenticated initially or can switch
+  AuthCubit({
+    required Login login,
+    required GetCurrentUser getCurrentUser,
+    required Logout logout,
+  })  : _login = login,
+        _getCurrentUser = getCurrentUser,
+        _logout = logout,
+        super(const AuthInitial()) {
+    checkAuth();
+  }
+
+  Future<void> checkAuth() async {
+    final result = await _getCurrentUser(const NoParams());
+    result.fold(
+      (failure) => emit(const Unauthenticated()),
+      (user) {
+        if (user != null) {
+          emit(Authenticated(user));
+        } else {
+          emit(const Unauthenticated());
+        }
+      },
+    );
   }
 
   Future<void> login(String username, String password) async {
     emit(const AuthLoading());
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (username.trim().toLowerCase() == 'admin' && password == 'admin123') {
-      emit(const Authenticated(MockData.defaultAdmin));
-    } else if (username.trim().isNotEmpty && password.isNotEmpty) {
-      // Demo ease: allow custom login as well
-      emit(Authenticated(MockData.defaultAdmin));
-    } else {
-      emit(const AuthError('Invalid username or password. Use admin / admin123'));
-    }
+    final result = await _login(LoginParams(username: username, password: password));
+    result.fold(
+      (failure) => emit(AuthError(failure.message)),
+      (user) => emit(Authenticated(user)),
+    );
   }
 
-  void logout() {
+  Future<void> logout() async {
+    await _logout(const NoParams());
     emit(const Unauthenticated());
   }
 }

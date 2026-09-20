@@ -110,10 +110,16 @@ class CustomerFormCubit extends Cubit<CustomerFormState> {
       updatedAt: now,
     );
 
+    final bool success;
     if (state.isEdit) {
-      listCubit.updateCustomer(customer);
+      success = await listCubit.updateCustomer(customer);
     } else {
-      listCubit.addCustomer(customer);
+      success = await listCubit.addCustomer(customer);
+    }
+
+    if (!success) {
+      emit(state.copyWith(isSubmitting: false, errorMessage: 'Failed to save customer to local database.'));
+      return false;
     }
 
     emit(state.copyWith(isSubmitting: false, isSuccess: true));

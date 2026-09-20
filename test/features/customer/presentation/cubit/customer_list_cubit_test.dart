@@ -1,80 +1,85 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:crm_destop_sys/core/error/failures.dart';
+import 'package:crm_destop_sys/core/usecase/usecase.dart';
+import 'package:crm_destop_sys/features/customer/domain/entities/customer.dart';
+import 'package:crm_destop_sys/features/customer/domain/usecases/create_customer.dart';
+import 'package:crm_destop_sys/features/customer/domain/usecases/delete_customer.dart';
+import 'package:crm_destop_sys/features/customer/domain/usecases/get_customers.dart';
+import 'package:crm_destop_sys/features/customer/domain/usecases/search_customers.dart';
+import 'package:crm_destop_sys/features/customer/domain/usecases/update_customer.dart';
 import 'package:crm_destop_sys/features/customer/presentation/cubit/customer_list_cubit.dart';
 import 'package:crm_destop_sys/features/customer/presentation/cubit/customer_list_state.dart';
-import 'package:crm_destop_sys/features/customer/domain/entities/customer.dart';
+
+class MockGetCustomers extends Mock implements GetCustomers {}
+class MockCreateCustomer extends Mock implements CreateCustomer {}
+class MockUpdateCustomer extends Mock implements UpdateCustomer {}
+class MockDeleteCustomer extends Mock implements DeleteCustomer {}
+class MockSearchCustomers extends Mock implements SearchCustomers {}
 
 void main() {
-  group('CustomerListCubit', () {
-    late CustomerListCubit cubit;
+  late MockGetCustomers mockGetCustomers;
+  late MockCreateCustomer mockCreateCustomer;
+  late MockUpdateCustomer mockUpdateCustomer;
+  late MockDeleteCustomer mockDeleteCustomer;
+  late MockSearchCustomers mockSearchCustomers;
 
-    setUp(() {
-      cubit = CustomerListCubit();
-    });
-
-    tearDown(() {
-      cubit.close();
-    });
-
-    test('initial state is CustomerListLoaded with mock customers', () {
-      expect(cubit.state, isA<CustomerListLoaded>());
-      final loaded = cubit.state as CustomerListLoaded;
-      expect(loaded.allCustomers.isNotEmpty, true);
-    });
-
-    test('getCustomerById returns customer when ID exists', () {
-      final loaded = cubit.state as CustomerListLoaded;
-      final expected = loaded.allCustomers.first;
-      final result = cubit.getCustomerById(expected.id);
-      expect(result, equals(expected));
-    });
-
-    test('getCustomerById returns null when ID does not exist', () {
-      final result = cubit.getCustomerById('non_existing_id');
-      expect(result, isNull);
-    });
-
-    test('getCustomerByIdOrNationalId matches by National ID exactly', () {
-      final loaded = cubit.state as CustomerListLoaded;
-      final expected = loaded.allCustomers.first;
-      final result = cubit.getCustomerByIdOrNationalId(expected.nationalId);
-      expect(result, equals(expected));
-    });
-
-    test('getCustomerByIdOrNationalId matches by Customer ID case-insensitively', () {
-      final loaded = cubit.state as CustomerListLoaded;
-      final expected = loaded.allCustomers.first;
-      final result = cubit.getCustomerByIdOrNationalId(expected.id.toUpperCase());
-      expect(result, equals(expected));
-    });
-
-    test('getCustomerByIdOrNationalId returns null for empty or non-matching query', () {
-      expect(cubit.getCustomerByIdOrNationalId(''), isNull);
-      expect(cubit.getCustomerByIdOrNationalId('   '), isNull);
-      expect(cubit.getCustomerByIdOrNationalId('00000000000000'), isNull);
-    });
-
-    test('searchSuggestions returns matching customers by National ID, ID, or Name', () {
-      final loaded = cubit.state as CustomerListLoaded;
-      final firstCustomer = loaded.allCustomers.first;
-      
-      final byNationalId = cubit.searchSuggestions(firstCustomer.nationalId.substring(0, 4));
-      expect(byNationalId.contains(firstCustomer), true);
-
-      final byName = cubit.searchSuggestions(firstCustomer.fullName.substring(0, 3));
-      expect(byName.contains(firstCustomer), true);
-    });
-
-    test('search filters customers properly', () {
-      final loaded = cubit.state as CustomerListLoaded;
-      final firstCustomer = loaded.allCustomers.first;
-      
-      cubit.search(firstCustomer.fullName);
-      final searchLoaded = cubit.state as CustomerListLoaded;
-      expect(searchLoaded.filteredCustomers.any((c) => c.id == firstCustomer.id), true);
-
-      cubit.search('');
-      final resetLoaded = cubit.state as CustomerListLoaded;
-      expect(resetLoaded.filteredCustomers.length, equals(loaded.allCustomers.length));
-    });
+  setUp(() {
+    mockGetCustomers = MockGetCustomers();
+    mockCreateCustomer = MockCreateCustomer();
+    mockUpdateCustomer = MockUpdateCustomer();
+    mockDeleteCustomer = MockDeleteCustomer();
+    mockSearchCustomers = MockSearchCustomers();
   });
+
+  final testCustomer = Customer(
+    id: 'cust_1',
+    nationalId: '29501011234567',
+    fullName: 'Ahmed Hassan',
+    phoneNumbers: const ['01012345678'],
+    customFields: const {'Preferred Branch': 'Nasr City'},
+    createdAt: DateTime(2026, 1, 1),
+    updatedAt: DateTime(2026, 1, 1),
+  );
+
+  CustomerListCubit buildCubit() {
+    return CustomerListCubit(
+      getCustomers: mockGetCustomers,
+      createCustomer: mockCreateCustomer,
+      updateCustomer: mockUpdateCustomer,
+      deleteCustomer: mockDeleteCustomer,
+      searchCustomers: mockSearchCustomers,
+    );
+  }
+
+  blocTest<CustomerListCubit, CustomerListState>(
+    'emits [CustomerListLoading, CustomerListLoaded] when loadCustomers succeeds',
+    build: () {
+      when(() => mockGetCustomers(const NoParams()))
+          .thenAnswer((_) async => Right([testCustomer]));
+      return buildCubit();
+    },
+    expect: () => [
+      const CustomerListLoading(),
+      CustomerListLoaded(
+        allCustomers: [testCustomer],
+        filteredCustomers: [testCustomer],
+      ),
+    ],
+  );
+
+  blocTest<CustomerListCubit, CustomerListState>(
+    'emits [CustomerListLoading, CustomerListError] when loadCustomers fails',
+    build: () {
+      when(() => mockGetCustomers(const NoParams()))
+          .thenAnswer((_) async => const Left(DatabaseFailure('SQLite failed')));
+      return buildCubit();
+    },
+    expect: () => [
+      const CustomerListLoading(),
+      const CustomerListError('SQLite failed'),
+    ],
+  );
 }

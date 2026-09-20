@@ -1,19 +1,45 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/mock/mock_data.dart';
+import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/customer.dart';
+import '../../domain/usecases/create_customer.dart';
+import '../../domain/usecases/delete_customer.dart';
+import '../../domain/usecases/get_customers.dart';
+import '../../domain/usecases/search_customers.dart';
+import '../../domain/usecases/update_customer.dart';
 import 'customer_list_state.dart';
 
 class CustomerListCubit extends Cubit<CustomerListState> {
-  CustomerListCubit() : super(const CustomerListLoading()) {
+  final GetCustomers _getCustomers;
+  final CreateCustomer _createCustomer;
+  final UpdateCustomer _updateCustomer;
+  final DeleteCustomer _deleteCustomer;
+  final SearchCustomers _searchCustomers;
+
+  CustomerListCubit({
+    required GetCustomers getCustomers,
+    required CreateCustomer createCustomer,
+    required UpdateCustomer updateCustomer,
+    required DeleteCustomer deleteCustomer,
+    required SearchCustomers searchCustomers,
+  })  : _getCustomers = getCustomers,
+        _createCustomer = createCustomer,
+        _updateCustomer = updateCustomer,
+        _deleteCustomer = deleteCustomer,
+        _searchCustomers = searchCustomers,
+        super(const CustomerListLoading()) {
     loadCustomers();
   }
 
-  void loadCustomers() {
-    final list = List<Customer>.from(MockData.initialCustomers);
-    emit(CustomerListLoaded(
-      allCustomers: list,
-      filteredCustomers: list,
-    ));
+  Future<void> loadCustomers() async {
+    emit(const CustomerListLoading());
+    final result = await _getCustomers(const NoParams());
+    result.fold(
+      (failure) => emit(CustomerListError(failure.message)),
+      (list) => emit(CustomerListLoaded(
+        allCustomers: list,
+        filteredCustomers: list,
+      )),
+    );
   }
 
   void search(String query) {
@@ -77,37 +103,62 @@ class CustomerListCubit extends Cubit<CustomerListState> {
         (excludeCustomerId == null || c.id != excludeCustomerId));
   }
 
-  void addCustomer(Customer customer) {
-    if (state is! CustomerListLoaded) return;
-    final current = state as CustomerListLoaded;
-
-    final updatedAll = [customer, ...current.allCustomers];
-    emit(current.copyWith(
-      allCustomers: updatedAll,
-      filteredCustomers: _applyFilters(updatedAll, current.searchQuery, current.selectedBranch),
-    ));
+  Future<bool> addCustomer(Customer customer) async {
+    final result = await _createCustomer(customer);
+    return result.fold(
+      (failure) => false,
+      (saved) {
+        if (state is CustomerListLoaded) {
+          final current = state as CustomerListLoaded;
+          final updatedAll = [saved, ...current.allCustomers];
+          emit(current.copyWith(
+            allCustomers: updatedAll,
+            filteredCustomers: _applyFilters(updatedAll, current.searchQuery, current.selectedBranch),
+          ));
+        } else {
+          loadCustomers();
+        }
+        return true;
+      },
+    );
   }
 
-  void updateCustomer(Customer updated) {
-    if (state is! CustomerListLoaded) return;
-    final current = state as CustomerListLoaded;
-
-    final updatedAll = current.allCustomers.map((c) => c.id == updated.id ? updated : c).toList();
-    emit(current.copyWith(
-      allCustomers: updatedAll,
-      filteredCustomers: _applyFilters(updatedAll, current.searchQuery, current.selectedBranch),
-    ));
+  Future<bool> updateCustomer(Customer updated) async {
+    final result = await _updateCustomer(updated);
+    return result.fold(
+      (failure) => false,
+      (saved) {
+        if (state is CustomerListLoaded) {
+          final current = state as CustomerListLoaded;
+          final updatedAll = current.allCustomers.map((c) => c.id == saved.id ? saved : c).toList();
+          emit(current.copyWith(
+            allCustomers: updatedAll,
+            filteredCustomers: _applyFilters(updatedAll, current.searchQuery, current.selectedBranch),
+          ));
+        } else {
+          loadCustomers();
+        }
+        return true;
+      },
+    );
   }
 
-  void deleteCustomer(String customerId) {
-    if (state is! CustomerListLoaded) return;
-    final current = state as CustomerListLoaded;
-
-    final updatedAll = current.allCustomers.where((c) => c.id != customerId).toList();
-    emit(current.copyWith(
-      allCustomers: updatedAll,
-      filteredCustomers: _applyFilters(updatedAll, current.searchQuery, current.selectedBranch),
-    ));
+  Future<bool> deleteCustomer(String customerId) async {
+    final result = await _deleteCustomer(customerId);
+    return result.fold(
+      (failure) => false,
+      (_) {
+        if (state is CustomerListLoaded) {
+          final current = state as CustomerListLoaded;
+          final updatedAll = current.allCustomers.where((c) => c.id != customerId).toList();
+          emit(current.copyWith(
+            allCustomers: updatedAll,
+            filteredCustomers: _applyFilters(updatedAll, current.searchQuery, current.selectedBranch),
+          ));
+        }
+        return true;
+      },
+    );
   }
 
   Customer? getCustomerById(String id) {
