@@ -71,6 +71,11 @@ import 'features/auth/domain/usecases/logout.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 
 // Excel Feature
+import 'features/excel_io/data/datasources/excel_local_datasource.dart';
+import 'features/excel_io/data/repositories/excel_io_repository_impl.dart';
+import 'features/excel_io/domain/repositories/excel_io_repository.dart';
+import 'features/excel_io/domain/usecases/export_to_excel.dart';
+import 'features/excel_io/domain/usecases/import_from_excel.dart';
 import 'features/excel_io/presentation/cubit/excel_io_cubit.dart';
 
 final getIt = GetIt.instance;
@@ -205,5 +210,23 @@ Future<void> configureDependencies() async {
   ));
 
   // Excel Feature
-  getIt.registerFactory(() => ExcelIoCubit());
+  getIt.registerLazySingleton<ExcelLocalDatasource>(
+    () => ExcelLocalDatasourceImpl(),
+  );
+  getIt.registerLazySingleton<ExcelIoRepository>(
+    () => ExcelIoRepositoryImpl(
+      localDatasource: getIt<ExcelLocalDatasource>(),
+      customerRepository: getIt<CustomerRepository>(),
+      serviceRepository: getIt<ServiceRepository>(),
+      activityRepository: getIt<ActivityRepository>(),
+      orderRepository: getIt<OrderRepository>(),
+      billingRepository: getIt<BillingRepository>(),
+    ),
+  );
+  getIt.registerLazySingleton(() => ExportToExcel(getIt<ExcelIoRepository>()));
+  getIt.registerLazySingleton(() => ImportFromExcel(getIt<ExcelIoRepository>()));
+  getIt.registerFactory(() => ExcelIoCubit(
+    exportToExcel: getIt<ExportToExcel>(),
+    importFromExcel: getIt<ImportFromExcel>(),
+  ));
 }

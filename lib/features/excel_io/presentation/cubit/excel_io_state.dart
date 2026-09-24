@@ -1,29 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-class ExcelImportReport extends Equatable {
-  final int totalRows;
-  final int validRowsCount;
-  final List<String> duplicateNationalIds;
-  final List<String> malformedRowErrors;
-  final List<Map<String, String>> importedSampleRows;
-
-  const ExcelImportReport({
-    required this.totalRows,
-    required this.validRowsCount,
-    required this.duplicateNationalIds,
-    required this.malformedRowErrors,
-    required this.importedSampleRows,
-  });
-
-  @override
-  List<Object?> get props => [
-        totalRows,
-        validRowsCount,
-        duplicateNationalIds,
-        malformedRowErrors,
-        importedSampleRows,
-      ];
-}
+import '../../domain/entities/excel_export_result.dart';
+import '../../domain/entities/excel_import_report.dart';
 
 abstract class ExcelIoState extends Equatable {
   const ExcelIoState();
@@ -45,38 +23,26 @@ class ExcelIoProcessing extends ExcelIoState {
 }
 
 class ExcelExportSuccess extends ExcelIoState {
-  final String filename;
-  final int customersCount;
-  final int servicesCount;
-  final int activitiesCount;
-  final int ordersCount;
-  final int billsCount;
-  final DateTime exportedAt;
+  final ExcelExportResult result;
 
-  const ExcelExportSuccess({
-    required this.filename,
-    required this.customersCount,
-    required this.servicesCount,
-    required this.activitiesCount,
-    required this.ordersCount,
-    required this.billsCount,
-    required this.exportedAt,
-  });
+  const ExcelExportSuccess(this.result);
+
+  String get filename => result.fileName;
+  String get filePath => result.filePath;
+  int get customersCount => result.customersCount;
+  int get servicesCount => result.servicesCount;
+  int get activitiesCount => result.activitiesCount;
+  int get ordersCount => result.ordersCount;
+  int get billsCount => result.billsCount;
+  DateTime get exportedAt => result.exportedAt;
 
   @override
-  List<Object?> get props => [
-        filename,
-        customersCount,
-        servicesCount,
-        activitiesCount,
-        ordersCount,
-        billsCount,
-        exportedAt,
-      ];
+  List<Object?> get props => [result];
 }
 
 class ExcelImportSuccess extends ExcelIoState {
   final ExcelImportReport report;
+
   const ExcelImportSuccess(this.report);
 
   @override
@@ -85,6 +51,7 @@ class ExcelImportSuccess extends ExcelIoState {
 
 class ExcelIoError extends ExcelIoState {
   final String message;
+
   const ExcelIoError(this.message);
 
   @override
